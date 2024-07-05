@@ -141,7 +141,7 @@ def main():
 
     # Set the battery charge maximum limit
     try:
-        max_charge = int(input("Enter the maximum charge limit or press 0 to reset: "))
+        max_charge = int(input("\nEnter the maximum charge limit or press 0 to reset: "))
         if max_charge == 0:
             reset_battery_thresholds(battery_info)
             print("Battery charge limit reset successfully")
@@ -184,6 +184,10 @@ def main():
             logging.info("Operation cancelled")
     except ValueError:
         print("Invalid input")
+        return
+    except KeyboardInterrupt:
+        print(" Operation cancelled by user")
+        logging.info("Operation cancelled by user")
         return
 
     # Create a systemd service
