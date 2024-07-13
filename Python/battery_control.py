@@ -81,15 +81,15 @@ def set_system_service(max_charge: str, battery_system: str):
 
         for command in commands:
             print(f"Running command: {command}")
-            subprocess.run(command, shell=True, check=False)
+            subprocess.run(command.split(), check=False, shell=False)
             logging.info("Running command: %s", command)
 
     except FileNotFoundError:
-        print(
-            """
+        logging.warning(
+            msg="""
               run cat /etc/systemd/system/battery-charge-end-threshold.service to verify the service file\n
               run systemctl status battery-charge-end-threshold.service to check status\n
-              """
+            """
         )
 
 
@@ -115,10 +115,14 @@ def reset_battery_thresholds(battery_system: str):
         return
     # remove the systemd service
     try:
-        os.remove("/etc/systemd/system/battery-charge-end-threshold.service")
-        os.system("systemctl daemon-reload")
-        os.system("systemctl reset-failed")
-    except Exception as e:
+        command = ["sudo rm /etc/systemd/system/battery-charge-end-threshold.service",
+                   "sudo systemctl daemon-reload",
+                   "sudo systemctl reset-failed"]
+        for commands in command:
+            print(f"Running command: {commands}")
+            subprocess.run(commands, check=False, shell=False)
+            logging.info("Running command: %s", commands)
+    except OSError as e:
         print("See the error log in battery_control.log")
         logging.error("Error: %s", e)
 
@@ -141,7 +145,9 @@ def main():
 
     # Set the battery charge maximum limit
     try:
-        max_charge = int(input("\nEnter the maximum charge limit or press 0 to reset: "))
+        max_charge = int(
+            input("\nEnter the maximum charge limit or press 0 to reset: ")
+        )
         if max_charge == 0:
             reset_battery_thresholds(battery_info)
             print("Battery charge limit reset successfully")
