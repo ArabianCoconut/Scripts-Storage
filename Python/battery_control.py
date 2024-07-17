@@ -1,19 +1,25 @@
 import logging
+import pathlib
 import os
 import subprocess
 import time
 
 # Script based on the following LINK
 LINK = "https://ubuntuhandbook.org/index.php/2024/02/limit-battery-charge-ubuntu/"
+PATH_FILE = pathlib.Path(__file__).parent.joinpath("battery_control.log").resolve()
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    filename="battery_control.log",
-    filemode="w",
-)
+# Set the logging configuration
+try:
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        filename=PATH_FILE,
+        filemode="w",
+    )
+except FileExistsError:
+    logging.warning("File already exists")
+
 # Check if the script is running as SUDO/ROOT
-
 if os.geteuid() != 0:
     while True:
         print(
@@ -128,6 +134,7 @@ def reset_battery_thresholds(battery_system: str):
 
 
 def main():
+    """Main function to set the battery charge maximum limit"""
     battery_info_successful = "Battery charge limit set successfully\n"
     battery_info_successful_manually = (
         "Battery charge limit set manually and is successfully set\n"
