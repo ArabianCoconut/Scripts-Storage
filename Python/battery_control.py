@@ -6,7 +6,7 @@ import time
 
 import requests
 # Version 1.0.0
-VERSION = "1.0.0"
+CLIENT_VERSION = "1.0.0"
 # Script based on the following LINK
 LINK = "https://ubuntuhandbook.org/index.php/2024/02/limit-battery-charge-ubuntu/"
 PATH_FILE = pathlib.Path(__file__).parent.joinpath("battery_control.log").resolve()
@@ -139,20 +139,25 @@ def update_battery_scripts():
     """ Update the battery control script """
     url = "https://raw.githubusercontent.com/ArabianCoconut/Scripts-Storage/main/Python/battery_control.py"
     request = requests.get(url,timeout=60)
-    version_number = request.text.split("Version:")[1].split("\n")[0].strip()
+    version_number = request.text.split("Version")[1].split("\n")[0].strip()
     script_upto_updated = f"The script is up to date version: {version_number}"
     script_updated = f"The script has been updated to version: {version_number}"
     user_cancelled = "Operation cancelled by user"
     try:
-        with open(pathlib.Path(__file__), "w", encoding="UTF-8") as f:
-            if version_number == VERSION:
-                print(script_upto_updated)
-                logging.info(script_upto_updated)
+        if version_number == CLIENT_VERSION:
+            print(script_upto_updated)
+            logging.info(script_upto_updated)
+        else:
+            input(f"New version available: {version_number}, press any key to update or CTRL+C to cancel...")
+            if input() == KeyboardInterrupt:
+                print(user_cancelled)
+                logging.info(user_cancelled)
+                return
             else:
-                input(f"New version available: {version_number}, press any key to update or CTRL+C to cancel...")
-                f.write(request.text)
-                print(script_updated)
-                logging.info(script_updated)
+                with open(pathlib.Path(__file__), "w+", encoding="UTF-8") as f:
+                    f.write(request.text)
+                    print(script_updated)
+                    logging.info(script_updated)
     except KeyboardInterrupt:
         print(user_cancelled)
         logging.info(user_cancelled)
