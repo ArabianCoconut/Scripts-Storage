@@ -3,10 +3,10 @@ import pathlib
 import os
 import subprocess
 import time
-
 import requests
-# Version 1.0.0
-CLIENT_VERSION = "1.0.0"
+import threading
+# Version 1.0.1
+CLIENT_VERSION = "1.0.1"
 # Script based on the following LINK
 LINK = "https://ubuntuhandbook.org/index.php/2024/02/limit-battery-charge-ubuntu/"
 PATH_FILE = pathlib.Path(__file__).parent.joinpath("battery_control.log").resolve()
@@ -131,9 +131,12 @@ def reset_battery_thresholds(battery_system: str):
             print(f"Running command: {commands}")
             subprocess.run(commands, check=False, shell=False)
             logging.info("Running command: %s", commands)
-    except OSError as e:
-        print("See the error log in battery_control.log")
+    except FileNotFoundError as e:
+        print("Warning:File not found")
         logging.error("Error: %s", e)
+    except OSError as e:
+        print("OS error occured see log in battery_control.log")
+        logging.error("OSerror: %s",e)
 
 def update_battery_scripts():
     """ Update the battery control script """
@@ -149,7 +152,7 @@ def update_battery_scripts():
             logging.info(script_upto_updated)
         else:
             input(f"New version available: {version_number}, press any key to update or CTRL+C to cancel...")
-            if input() == KeyboardInterrupt:
+            if input() is KeyboardInterrupt:
                 print(user_cancelled)
                 logging.info(user_cancelled)
                 return
@@ -265,3 +268,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    threading.Thread(target=update_battery_scripts()).run()
