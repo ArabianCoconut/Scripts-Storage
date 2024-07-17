@@ -4,7 +4,9 @@ import os
 import subprocess
 import time
 
-# Version: 1.0.0
+import requests
+# Version 1.0.0
+VERSION = "1.0.0"
 # Script based on the following LINK
 LINK = "https://ubuntuhandbook.org/index.php/2024/02/limit-battery-charge-ubuntu/"
 PATH_FILE = pathlib.Path(__file__).parent.joinpath("battery_control.log").resolve()
@@ -133,6 +135,23 @@ def reset_battery_thresholds(battery_system: str):
         print("See the error log in battery_control.log")
         logging.error("Error: %s", e)
 
+def update_battery_scripts():
+    """ Update the battery control script """
+    url = "https://raw.githubusercontent.com/ArabianCoconut/Scripts-Storage/main/Python/battery_control.py"
+    request = requests.get(url,timeout=60)
+    version_number = request.text.split("Version:")[1].split("\n")[0].strip()
+    script_upto_updated = f"The script is up to date version: {version_number}"
+    script_updated = f"The script has been updated to version: {version_number}"
+    with open(pathlib.Path(__file__), "w", encoding="UTF-8") as f:
+        if version_number == VERSION:
+            print(script_upto_updated)
+            logging.info(script_upto_updated)
+        else:
+            input(f"New version available: {version_number}, press any key to update or CTRL+C to cancel...")
+            f.write(request.text)
+            print(script_updated)
+            logging.info(script_updated)
+
 
 def main():
     """Main function to set the battery charge maximum limit"""
@@ -140,9 +159,18 @@ def main():
     battery_info_successful_manually = (
         "Battery charge limit set manually and is successfully set\n"
     )
+    # User messages
+    user_confirmation= "Confirm (y/n): "
+    ops_cancelled = "Operation cancelled"
+    message_info = "Battery charge limit reset successfully"
+    message_info_2 = "Systemd service removed and resetted successfully"
+    message_ops = "Operation completed successfully"
+    message_systemd = "Systemd service created successfully"
+    messsage_invalid = "Invalid input"
     # Get the battery system name
     print(f"Welcome {os.getlogin().upper()} to Battery Control Script\n")
     print(f"Any doubts, please refer to link:{LINK}\n")
+    
     try:
         battery_info = (
             subprocess.getoutput("ls /sys/class/power_supply/").split().pop(1).strip()
@@ -153,17 +181,20 @@ def main():
 
     # Set the battery charge maximum limit
     try:
+        check_update = input("Do you want to check for updates? (y/n): ")
+        if check_update.lower() in ["y", "yes"]:
+            update_battery_scripts()
         max_charge = int(
-            input("\nEnter the maximum charge limit or press 0 to reset: ")
+            input("\nEnter the maximum charge limit or press 0 to reset:")
         )
         if max_charge == 0:
             reset_battery_thresholds(battery_info)
-            print("Battery charge limit reset successfully")
-            print("Systemd service removed and resetted successfully")
-            logging.info("Battery charge limit reset successfully")
-            logging.info("Systemd service removed and resetted successfully")
-            logging.info("Operation completed successfully")
-            return
+            print(message_info)
+            print(message_info_2)
+            logging.info(message_info)
+            logging.info(message_info_2)
+            logging.info(message_ops)
+
         print(
             f"""
                 Verify the following:
@@ -172,17 +203,17 @@ def main():
                 2. Setting maximum charge: {str(max_charge)}
             """
         )
-        confirm = input("Confirm (y/n): ")
+        confirm = input(user_confirmation)
         if confirm.lower() == "y":
             set_battery_thresholds(max_charge, battery_info)
             print(battery_info_successful)
             logging.info(battery_info_successful)
         elif confirm.lower() == "n":
             print("Do you want to set the battery charge limit manually?")
-            confirm = input("Confirm (y/n): ")
+            confirm = input(user_confirmation)
             if confirm.lower() == "n":
-                print("Operation cancelled")
-                logging.info("Operation cancelled")
+                print(ops_cancelled)
+                logging.info(ops_cancelled)
                 return
             else:
                 battery_info = input("Enter the battery system manually: ").upper()
@@ -193,14 +224,14 @@ def main():
                     "Battery charge limit set manually and is successfully set"
                 )
         else:
-            print("Operation cancelled")
+            print(ops_cancelled)
             time.sleep(2)
-            logging.info("Operation cancelled")
+            logging.info(ops_cancelled)
     except ValueError:
-        print("Invalid input")
+        print(messsage_invalid)
         return
     except KeyboardInterrupt:
-        print(" Operation cancelled by user")
+        print("Operation cancelled by user")
         logging.info("Operation cancelled by user")
         return
 
@@ -208,17 +239,17 @@ def main():
     print(
         "Do you want to create a systemd service to set the battery charge maximum limit?"
     )
-    confirm = input("Confirm (y/n): ")
+    confirm = input(user_confirmation)
     if confirm.lower() == "y":
         set_system_service(max_charge, battery_info)
-        print("Systemd service created successfully")
-        logging.info("Systemd service created successfully")
+        print(message_systemd)
+        logging.info(message_systemd)
     elif confirm.lower() == "n":
-        print("Operation cancelled")
+        print(ops_cancelled)
         time.sleep(2)
-        logging.info("Operation cancelled")
+        logging.info(ops_cancelled)
     else:
-        print("Invalid input")
+        print(messsage_invalid)
         return
 
 
