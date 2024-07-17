@@ -142,15 +142,21 @@ def update_battery_scripts():
     version_number = request.text.split("Version:")[1].split("\n")[0].strip()
     script_upto_updated = f"The script is up to date version: {version_number}"
     script_updated = f"The script has been updated to version: {version_number}"
-    with open(pathlib.Path(__file__), "w", encoding="UTF-8") as f:
-        if version_number == VERSION:
-            print(script_upto_updated)
-            logging.info(script_upto_updated)
-        else:
-            input(f"New version available: {version_number}, press any key to update or CTRL+C to cancel...")
-            f.write(request.text)
-            print(script_updated)
-            logging.info(script_updated)
+    user_cancelled = "Operation cancelled by user"
+    try:
+        with open(pathlib.Path(__file__), "w", encoding="UTF-8") as f:
+            if version_number == VERSION:
+                print(script_upto_updated)
+                logging.info(script_upto_updated)
+            else:
+                input(f"New version available: {version_number}, press any key to update or CTRL+C to cancel...")
+                f.write(request.text)
+                print(script_updated)
+                logging.info(script_updated)
+    except KeyboardInterrupt:
+        print(user_cancelled)
+        logging.info(user_cancelled)
+        return
 
 
 def main():
