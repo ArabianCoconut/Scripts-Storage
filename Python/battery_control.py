@@ -1,10 +1,12 @@
 import logging
-import pathlib
 import os
+import pathlib
 import subprocess
-import time
-import requests
 import threading
+import time
+
+import requests
+
 # Version 1.0.1
 CLIENT_VERSION = "1.0.1"
 # Script based on the following LINK
@@ -124,9 +126,11 @@ def reset_battery_thresholds(battery_system: str):
         return
     # remove the systemd service
     try:
-        command = ["sudo rm /etc/systemd/system/battery-charge-end-threshold.service",
-                   "sudo systemctl daemon-reload",
-                   "sudo systemctl reset-failed"]
+        command = [
+            "sudo rm /etc/systemd/system/battery-charge-end-threshold.service",
+            "sudo systemctl daemon-reload",
+            "sudo systemctl reset-failed",
+        ]
         for commands in command:
             print(f"Running command: {commands}")
             subprocess.run(commands, check=False, shell=False)
@@ -136,12 +140,13 @@ def reset_battery_thresholds(battery_system: str):
         logging.error("Error: %s", e)
     except OSError as e:
         print("OS error occured see log in battery_control.log")
-        logging.error("OSerror: %s",e)
+        logging.error("OSerror: %s", e)
+
 
 def update_battery_scripts():
-    """ Update the battery control script """
+    """Update the battery control script"""
     url = "https://raw.githubusercontent.com/ArabianCoconut/Scripts-Storage/main/Python/battery_control.py"
-    request = requests.get(url,timeout=60)
+    request = requests.get(url, timeout=60)
     version_number = request.text.split("Version")[1].split("\n")[0].strip()
     script_upto_updated = f"The script is up to date version: {version_number}"
     script_updated = f"The script has been updated to version: {version_number}"
@@ -151,7 +156,9 @@ def update_battery_scripts():
             print(script_upto_updated)
             logging.info(script_upto_updated)
         else:
-            input(f"New version available: {version_number}, press any key to update or CTRL+C to cancel...")
+            input(
+                f"New version available: {version_number}, press any key to update or CTRL+C to cancel..."
+            )
             if input() is KeyboardInterrupt:
                 print(user_cancelled)
                 logging.info(user_cancelled)
@@ -174,7 +181,7 @@ def main():
         "Battery charge limit set manually and is successfully set\n"
     )
     # User messages
-    user_confirmation= "Confirm (y/n): "
+    user_confirmation = "Confirm (y/n): "
     ops_cancelled = "Operation cancelled"
     message_info = "Battery charge limit reset successfully"
     message_info_2 = "Systemd service removed and resetted successfully"
@@ -183,7 +190,7 @@ def main():
     messsage_invalid = "Invalid input"
     # Get the battery system name
     print(f"Welcome {os.getlogin().upper()} to Battery Control Script\n")
-    print(f"Any doubts, please refer to link:{LINK}\n")   
+    print(f"Any doubts, please refer to link:{LINK}\n")
     try:
         battery_info = (
             subprocess.getoutput("ls /sys/class/power_supply/").split().pop(1).strip()
@@ -197,9 +204,7 @@ def main():
         check_update = input("Do you want to check for updates? (y/n): ")
         if check_update.lower() in ["y", "yes"]:
             update_battery_scripts()
-        max_charge = int(
-            input("\nEnter the maximum charge limit or press 0 to reset:")
-        )
+        max_charge = int(input("\nEnter the maximum charge limit or press 0 to reset:"))
         if max_charge == 0:
             reset_battery_thresholds(battery_info)
             print(message_info)
