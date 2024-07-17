@@ -4,6 +4,7 @@ import os
 import subprocess
 import time
 
+# Version: 1.0.0
 # Script based on the following LINK
 LINK = "https://ubuntuhandbook.org/index.php/2024/02/limit-battery-charge-ubuntu/"
 PATH_FILE = pathlib.Path(__file__).parent.joinpath("battery_control.log").resolve()
