@@ -180,8 +180,7 @@ def main():
     messsage_invalid = "Invalid input"
     # Get the battery system name
     print(f"Welcome {os.getlogin().upper()} to Battery Control Script\n")
-    print(f"Any doubts, please refer to link:{LINK}\n")
-    
+    print(f"Any doubts, please refer to link:{LINK}\n")   
     try:
         battery_info = (
             subprocess.getoutput("ls /sys/class/power_supply/").split().pop(1).strip()
